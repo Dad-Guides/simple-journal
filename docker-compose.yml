@@ -1,0 +1,21 @@
+services:
+  journal-web:
+    container_name: journal-web
+    build:
+      context: ./journal-web
+      target: runner
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+    ports:
+      - "3003:3003"
+    restart: unless-stopped
+    networks:
+      - ogdenor
+
+networks:
+  ogdenor:
+    external: true
+    name: ogdenor

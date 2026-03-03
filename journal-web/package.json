@@ -1,0 +1,47 @@
+{
+  "name": "journal-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "eslint",
+    "test": "vitest run",
+    "prisma:generate": "dotenv --path ../.env -- prisma generate",
+    "prisma:format": "prisma format",
+    "db:migrate": "dotenv --path ../.env -- prisma migrate deploy",
+    "db:seed": "dotenv --path ../.env -- prisma db seed"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "argon2": "^0.44.0",
+    "jose": "^6.1.2",
+    "lucide-react": "^0.554.0",
+    "next": "16.0.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "dotenv-cli": "^11.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.3",
+    "jsdom": "^27.2.0",
+    "prisma": "^6.19.0",
+    "react-test-renderer": "^19.2.0",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^5.1.1",
+    "vitest": "^3.0.2"
+  },
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/seed.ts"
+  }
+}

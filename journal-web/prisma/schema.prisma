@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EntryType {
+  ANGER
+  GRATITUDE
+  CREATIVE
+}
+
+model User {
+  id           String         @id @default(uuid())
+  passcodeHash String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  entries      JournalEntry[]
+}
+
+model EntryCounter {
+  id        Int       @id @default(autoincrement())
+  entryType EntryType @unique
+  counter   Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model JournalEntry {
+  id                String           @id @default(uuid())
+  userId            String
+  user              User             @relation(fields: [userId], references: [id])
+  entryType         EntryType
+  title             String
+  bodyMarkdown      String           @default("")
+  angerReason       String?
+  gratitudePromptId String?
+  gratitudePrompt   GratitudePrompt? @relation(fields: [gratitudePromptId], references: [id])
+  creativePromptId  String?
+  creativePrompt    CreativePrompt?  @relation(fields: [creativePromptId], references: [id])
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
+
+model GratitudePrompt {
+  id         String         @id @default(uuid())
+  promptText String         @unique
+  isActive   Boolean        @default(true)
+  createdAt  DateTime       @default(now())
+  entries    JournalEntry[]
+}
+
+model CreativePersona {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CreativePrompt {
+  id           String         @id @default(uuid())
+  personasUsed Json?
+  promptText   String
+  aiRaw        Json?
+  createdAt    DateTime       @default(now())
+  entries      JournalEntry[]
+}
