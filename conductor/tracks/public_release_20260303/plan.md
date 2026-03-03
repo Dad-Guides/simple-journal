@@ -10,7 +10,7 @@
 
 ## Phase 1 — Repository Hygiene
 
-### P1 — Purge sensitive data from git history  `[ ]`
+### P1 — Purge sensitive data from git history  `[x]`
 
 **Files:**
 - `journal_backup.sql` (delete + history scrub)
@@ -29,7 +29,7 @@
 
 ---
 
-### P2 — Update `.gitignore` for SQL dumps  `[ ]`
+### P2 — Update `.gitignore` for SQL dumps  `[x]`
 
 **Files:**
 - `.gitignore` (modify)
@@ -47,7 +47,7 @@
 
 ## Phase 2 — Self-Contained Docker Stack
 
-### P3 — Rewrite `docker-compose.yml` with bundled Postgres  `[ ]`
+### P3 — Rewrite `docker-compose.yml` with bundled Postgres  `[x]`
 
 **Files:**
 - `docker-compose.yml` (rewrite)
@@ -65,7 +65,7 @@
 
 ---
 
-### P4 — Create `docker-compose.override.yml.example`  `[ ]`
+### P4 — Create `docker-compose.override.yml.example`  `[x]`
 
 **Files:**
 - `docker-compose.override.yml.example` (new)
@@ -82,7 +82,7 @@
 
 ## Phase 3 — Configuration Cleanup
 
-### P5 — Rewrite `.env.example`  `[ ]`
+### P5 — Rewrite `.env.example`  `[x]`
 
 **Files:**
 - `.env.example` (rewrite)
@@ -102,7 +102,7 @@
 
 ---
 
-### P6 — Standardize port to 3003  `[ ]`
+### P6 — Standardize port to 3003  `[x]`
 
 **Files:**
 - `journal-web/Dockerfile` (modify: `EXPOSE 3001` → `EXPOSE 3003`, `ENV PORT=3001` → `ENV PORT=3003`)
@@ -122,7 +122,7 @@
 
 ## Phase 4 — AI Provider Abstraction
 
-### P7 — Refactor `creative/route.ts` to OpenAI-compatible API  `[ ]`
+### P7 — Refactor `creative/route.ts` to OpenAI-compatible API  `[x]`
 
 **Files:**
 - `journal-web/src/app/api/prompts/creative/route.ts` (rewrite AI function)
@@ -143,7 +143,7 @@
 
 ---
 
-### P8 — Update `page.tsx` AI references  `[ ]`
+### P8 — Update `page.tsx` AI references  `[x]`
 
 **Files:**
 - `journal-web/src/app/page.tsx` (modify ~10 lines)
@@ -159,7 +159,7 @@
 
 ---
 
-### P9 — Update `settings/page.tsx`  `[ ]`
+### P9 — Update `settings/page.tsx`  `[x]`
 
 **Files:**
 - `journal-web/src/app/settings/page.tsx` (modify)
@@ -177,7 +177,7 @@
 
 ---
 
-### P10 — Update `route.test.ts` for new AI response format  `[ ]`
+### P10 — Update `route.test.ts` for new AI response format  `[x]`
 
 **Files:**
 - `journal-web/src/app/api/prompts/creative/route.test.ts` (modify)
@@ -193,7 +193,7 @@
 
 ---
 
-### P11 — Update `manifest.ts`  `[ ]`
+### P11 — Update `manifest.ts`  `[x]`
 
 **Files:**
 - `journal-web/src/app/manifest.ts` (modify 1 line)
@@ -344,17 +344,17 @@
 
 ## Completion Checklist
 
-- [ ] P1 — Purge sensitive data from git history
-- [ ] P2 — Update .gitignore for SQL dumps
-- [ ] P3 — Rewrite docker-compose.yml (self-contained stack)
-- [ ] P4 — Create docker-compose.override.yml.example
-- [ ] P5 — Rewrite .env.example
-- [ ] P6 — Standardize port to 3003
-- [ ] P7 — Refactor creative/route.ts (OpenAI-compatible API)
-- [ ] P8 — Update page.tsx AI references
-- [ ] P9 — Update settings/page.tsx
-- [ ] P10 — Update route.test.ts
-- [ ] P11 — Update manifest.ts
+- [x] P1 — Purge sensitive data from git history
+- [x] P2 — Update .gitignore for SQL dumps
+- [x] P3 — Rewrite docker-compose.yml (self-contained stack)
+- [x] P4 — Create docker-compose.override.yml.example
+- [x] P5 — Rewrite .env.example
+- [x] P6 — Standardize port to 3003
+- [x] P7 — Refactor creative/route.ts (OpenAI-compatible API)
+- [x] P8 — Update page.tsx AI references
+- [x] P9 — Update settings/page.tsx
+- [x] P10 — Update route.test.ts
+- [x] P11 — Update manifest.ts
 - [ ] P12 — Create entrypoint.sh and update Dockerfile
 - [ ] P13 — Rewrite README.md
 - [ ] P14 — Update USER_GUIDE.md
