@@ -30,10 +30,12 @@ describe("POST /api/prompts/creative", () => {
     vi.clearAllMocks();
     mockedSession.mockResolvedValue("user-1");
     vi.stubGlobal("fetch", fetchMock);
+    vi.stubEnv("AI_BASE_URL", "http://test-ai-provider");
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it("requires authentication", async () => {
@@ -63,7 +65,7 @@ describe("POST /api/prompts/creative", () => {
     expect(mockedPromptCreate).not.toHaveBeenCalled();
   });
 
-  it("generates a prompt via Ollama when personas are available", async () => {
+  it("generates a prompt via AI when personas are available", async () => {
     mockedPersonaFindMany.mockResolvedValue([
       {
         id: "persona-1",
@@ -78,7 +80,7 @@ describe("POST /api/prompts/creative", () => {
     fetchMock.mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({ response: "Write about stardust." }),
+      json: async () => ({ choices: [{ message: { content: "Write about stardust." } }] }),
     });
 
     const response = await POST(
@@ -88,7 +90,7 @@ describe("POST /api/prompts/creative", () => {
       }),
     );
     const body = (await response.json()) as {
-      prompt: { id: string; text: string; fromOllama: boolean };
+      prompt: { id: string; text: string; fromAI: boolean };
     };
 
     expect(response.status).toBe(201);
@@ -110,7 +112,7 @@ describe("POST /api/prompts/creative", () => {
     expect(body.prompt).toEqual({
       id: "prompt-1",
       text: "Write about stardust.",
-      fromOllama: true,
+      fromAI: true,
       personas: [
         {
           id: "persona-1",
@@ -121,7 +123,7 @@ describe("POST /api/prompts/creative", () => {
     });
   });
 
-  it("falls back when Ollama fails and still stores a prompt", async () => {
+  it("falls back when AI provider is unreachable and still stores a prompt", async () => {
     mockedPersonaFindMany.mockResolvedValue([
       {
         id: "persona-2",
@@ -142,7 +144,7 @@ describe("POST /api/prompts/creative", () => {
       }),
     );
     const body = (await response.json()) as {
-      prompt: { id: string; text: string; fromOllama: boolean };
+      prompt: { id: string; text: string; fromAI: boolean };
     };
 
     expect(response.status).toBe(202);
@@ -150,6 +152,6 @@ describe("POST /api/prompts/creative", () => {
     const savedPromptText =
       mockedPromptCreate.mock.calls[0]?.[0]?.data?.promptText ?? "";
     expect(savedPromptText).toContain("Journalist");
-    expect(body.prompt.fromOllama).toBe(false);
+    expect(body.prompt.fromAI).toBe(false);
   });
 });

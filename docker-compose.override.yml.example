@@ -1,0 +1,17 @@
+# Copy to docker-compose.override.yml to use an external Postgres.
+# Also set DATABASE_URL in .env to point at your external host.
+
+services:
+  db:
+    profiles:
+      - disabled   # prevents db from starting; never matches a --profile flag
+
+  journal-web:
+    depends_on: {}   # removes healthcheck dependency on bundled db
+    # Uncomment to join an external Docker network:
+    # networks:
+    #   - your-network-name
+
+# networks:
+#   your-network-name:
+#     external: true

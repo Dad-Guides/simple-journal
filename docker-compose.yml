@@ -1,4 +1,19 @@
 services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-journal}
+      POSTGRES_USER: ${POSTGRES_USER:-journal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-journal}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   journal-web:
     container_name: journal-web
     build:
@@ -8,14 +23,13 @@ services:
       - .env
     environment:
       NODE_ENV: production
-      PORT: 3003
+      DATABASE_URL: ${DATABASE_URL:-postgres://${POSTGRES_USER:-journal}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-journal}}
     ports:
-      - "3003:3003"
+      - "${PORT:-3003}:3003"
     restart: unless-stopped
-    networks:
-      - ogdenor
+    depends_on:
+      db:
+        condition: service_healthy
 
-networks:
-  ogdenor:
-    external: true
-    name: ogdenor
+volumes:
+  pgdata:

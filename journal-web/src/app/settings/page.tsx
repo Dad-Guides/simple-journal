@@ -7,16 +7,16 @@ const ENV_VARS = [
     description: "PostgreSQL connection string used by Prisma.",
   },
   {
-    name: "REDIS_URL",
-    description: "Redis instance for session caching.",
+    name: "AI_BASE_URL",
+    description: "Base URL for any OpenAI-compatible endpoint (e.g. http://localhost:11434/v1 for Ollama).",
   },
   {
-    name: "OLLAMA_URL",
-    description: "Base URL for the internal Ollama API (e.g. http://ollama.tailnet.local:11434).",
+    name: "AI_MODEL",
+    description: "Model identifier passed to the AI provider (e.g. mistral:latest).",
   },
   {
-    name: "OLLAMA_MODEL",
-    description: "Model ID passed to Ollama (mistral:latest, gpt-oss:20b, etc.).",
+    name: "AI_API_KEY",
+    description: "Bearer token for cloud AI providers. Omit for local Ollama.",
   },
   {
     name: "JWT_SECRET",
@@ -33,14 +33,14 @@ export default function SettingsPage() {
             Settings & Maintenance
           </h1>
           <p className="text-base text-[--muted]">
-            Quick reference for connecting Ollama, seeding prompts, and keeping personas in sync.
+            Quick reference for configuring your AI provider, seeding prompts, and keeping personas in sync.
           </p>
         </header>
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold text-[--foreground]">Environment Essentials</h2>
           <p className="text-sm text-[--muted]">
-            Update <code className="font-semibold text-[--accent]">.env</code> before rebuilding the Docker stack. All values remain on the tailnet.
+            Update <code className="font-semibold text-[--accent]">.env</code> before rebuilding the Docker stack.
           </p>
           <div className="space-y-3 rounded-xl border border-[--border-soft] bg-[--surface] p-4">
             {ENV_VARS.map((variable) => (
@@ -73,9 +73,9 @@ export default function SettingsPage() {
               </p>
             </div>
              <div className="space-y-2 rounded-xl border border-[--border-soft] bg-[--surface] p-4 md:col-span-2">
-              <h3 className="font-semibold text-[--foreground]">Ollama Connection</h3>
+              <h3 className="font-semibold text-[--foreground]">AI Provider Connection</h3>
               <p className="text-sm text-[--muted]">
-                Ensure <code className="font-semibold text-[--accent]">OLLAMA_URL</code> is reachable from the Docker network. Check with: <code className="font-semibold text-[--accent]">docker compose exec journal-web curl $OLLAMA_URL/api/version</code>
+                Ensure <code className="font-semibold text-[--accent]">AI_BASE_URL</code> is reachable from the Docker network. Check with: <code className="font-semibold text-[--accent]">docker compose exec journal-web curl $AI_BASE_URL/models</code>
               </p>
             </div>
           </div>

@@ -3,16 +3,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/auth";
 
-const DEFAULT_OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "mistral:latest";
-const DEFAULT_OLLAMA_URL =
-  process.env.OLLAMA_URL ?? "http://ollama.tailnet.local:11434";
+const AI_MODEL = process.env.AI_MODEL ?? "mistral:latest";
 
 type CreativePromptPayload = {
   personaIds?: string[];
   seedText?: string;
 };
 
-type OllamaResult =
+type AIResult =
   | { ok: true; text: string; raw: unknown }
   | { ok: false; text: string; raw: unknown; reason: string };
 
@@ -51,11 +49,11 @@ export async function POST(request: Request) {
     .map((persona) => `${persona.name}: ${persona.description}`)
     .join("\n");
   const generatorPrompt = buildGeneratorPrompt(personasSummary, seedText);
-  const ollamaResult = await generateViaOllama(generatorPrompt);
+  const aiResult = await generateViaAI(generatorPrompt);
 
   const finalText =
-    ollamaResult.ok && ollamaResult.text.trim().length > 0
-      ? sanitizePromptText(ollamaResult.text)
+    aiResult.ok && aiResult.text.trim().length > 0
+      ? sanitizePromptText(aiResult.text)
       : buildFallbackPrompt(
           personas.map((persona) => ({ name: persona.name, description: persona.description })),
           seedText,
@@ -72,10 +70,10 @@ export async function POST(request: Request) {
       personas: personasUsed,
       seedText,
       prompt: generatorPrompt,
-      model: DEFAULT_OLLAMA_MODEL,
+      model: AI_MODEL,
     },
-    response: (ollamaResult.raw ?? null) as Prisma.InputJsonValue,
-    usedFallback: !ollamaResult.ok,
+    response: (aiResult.raw ?? null) as Prisma.InputJsonValue,
+    usedFallback: !aiResult.ok,
   };
 
   const promptRecord = await prisma.creativePrompt.create({
@@ -92,10 +90,10 @@ export async function POST(request: Request) {
         id: promptRecord.id,
         text: promptRecord.promptText,
         personas: personasUsed,
-        fromOllama: ollamaResult.ok,
+        fromAI: aiResult.ok,
       },
     },
-    { status: ollamaResult.ok ? 201 : 202 },
+    { status: aiResult.ok ? 201 : 202 },
   );
 }
 
@@ -119,25 +117,32 @@ function buildGeneratorPrompt(personaSummary: string, seedText: string) {
   return `${base}${personaBlock}\n\n${seed}\n${instructions}\nReturn plain text without Markdown bullets or titles.`;
 }
 
-async function generateViaOllama(prompt: string): Promise<OllamaResult> {
-  if (!DEFAULT_OLLAMA_URL) {
+async function generateViaAI(prompt: string): Promise<AIResult> {
+  const aiBaseUrl = process.env.AI_BASE_URL ?? "";
+  const aiApiKey = process.env.AI_API_KEY ?? "";
+
+  if (!aiBaseUrl) {
     return {
       ok: false,
       text: "",
-      raw: { error: "OLLAMA_URL is not configured." },
+      raw: { error: "AI_BASE_URL is not configured." },
       reason: "missing_url",
     };
   }
 
-  const endpoint = new URL("/api/generate", DEFAULT_OLLAMA_URL);
+  const endpoint = new URL("/chat/completions", aiBaseUrl);
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (aiApiKey) {
+    headers["Authorization"] = `Bearer ${aiApiKey}`;
+  }
 
   try {
     const response = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
-        model: DEFAULT_OLLAMA_MODEL,
-        prompt,
+        model: AI_MODEL,
+        messages: [{ role: "user", content: prompt }],
         stream: false,
       }),
     });
@@ -146,22 +151,16 @@ async function generateViaOllama(prompt: string): Promise<OllamaResult> {
     if (!response.ok) {
       const reason =
         (data && typeof data.error === "string" && data.error) ||
-        `Ollama responded with ${response.status}`;
-      return {
-        ok: false,
-        text: "",
-        raw: data ?? { error: reason },
-        reason,
-      };
+        `AI provider responded with ${response.status}`;
+      return { ok: false, text: "", raw: data ?? { error: reason }, reason };
     }
 
-    const text =
-      data && typeof data.response === "string" ? data.response : "";
+    const text = data?.choices?.[0]?.message?.content ?? "";
     if (!text.trim()) {
       return {
         ok: false,
         text: "",
-        raw: data ?? { error: "Empty response from Ollama." },
+        raw: data ?? { error: "Empty response from AI provider." },
         reason: "empty_response",
       };
     }
@@ -172,8 +171,7 @@ async function generateViaOllama(prompt: string): Promise<OllamaResult> {
       ok: false,
       text: "",
       raw: {
-        error:
-          error instanceof Error ? error.message : "Unknown Ollama network error.",
+        error: error instanceof Error ? error.message : "Unknown AI provider network error.",
       },
       reason: "network_error",
     };
@@ -187,7 +185,7 @@ function buildFallbackPrompt(
   const personaNames = personas.map((persona) => persona.name).join(", ");
   const seed =
     seedText.length > 0
-      ? ` weaving in the seed “${seedText}”.`
+      ? ` weaving in the seed "${seedText}".`
       : " discovering surprise in an otherwise ordinary day.";
 
   return `Write a ${personaNames} inspired vignette${seed} Focus on texture, scent, and tiny gestures so the writer can expand it later.`;

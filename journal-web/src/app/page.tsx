@@ -40,7 +40,7 @@ type CreativePromptDto = {
   id: string;
   text: string;
   personas: CreativePersonaDto[];
-  fromOllama: boolean;
+  fromAI: boolean;
 };
 
 const TABS: { id: TabId; label: string; description: string }[] = [
@@ -557,7 +557,7 @@ function CreativeEntry({ onEntrySaved }: EntryFormProps) {
   const [promptNotice, setPromptNotice] = useState<string | null>(null);
   const [promptError, setPromptError] = useState<string | null>(null);
   const [promptLoading, setPromptLoading] = useState(false);
-  const [ollamaStatus, setOllamaStatus] = useState<
+  const [aiStatus, setAiStatus] = useState<
     "unknown" | "online" | "offline"
   >("unknown");
   const [body, setBody] = useState("");
@@ -642,7 +642,7 @@ function CreativeEntry({ onEntrySaved }: EntryFormProps) {
     setPromptLoading(true);
     setPromptError(null);
     setPromptNotice(null);
-    setOllamaStatus("unknown");
+    setAiStatus("unknown");
     try {
       const response = await fetch("/api/prompts/creative", {
         method: "POST",
@@ -658,11 +658,11 @@ function CreativeEntry({ onEntrySaved }: EntryFormProps) {
       }
       setPromptState(data.prompt);
       setPromptNotice(
-        data.prompt.fromOllama
-          ? "Generated via local Ollama."
-          : "Fallback prompt saved while Ollama is offline.",
+        data.prompt.fromAI
+          ? "Prompt generated via AI."
+          : "Fallback prompt saved (AI provider unreachable).",
       );
-      setOllamaStatus(data.prompt.fromOllama ? "online" : "offline");
+      setAiStatus(data.prompt.fromAI ? "online" : "offline");
     } catch (error) {
       setPromptState(null);
       setPromptNotice(null);
@@ -671,7 +671,7 @@ function CreativeEntry({ onEntrySaved }: EntryFormProps) {
           ? error.message
           : "Unexpected error while generating prompt.",
       );
-      setOllamaStatus("offline");
+      setAiStatus("offline");
     } finally {
       setPromptLoading(false);
     }
@@ -782,19 +782,19 @@ function CreativeEntry({ onEntrySaved }: EntryFormProps) {
             <p className="mt-1 inline-flex items-center gap-2 text-xs font-medium text-[--muted]">
               <span
                 className={`inline-flex h-2.5 w-2.5 rounded-full ${
-                  ollamaStatus === "online"
+                  aiStatus === "online"
                     ? "bg-green-500"
-                    : ollamaStatus === "offline"
+                    : aiStatus === "offline"
                       ? "bg-red-500"
                       : "bg-yellow-400"
                 }`}
                 aria-hidden
               />
-              {ollamaStatus === "online"
-                ? "Ollama online"
-                : ollamaStatus === "offline"
-                  ? "Ollama offline (using fallback)"
-                  : "Checking Ollama…"}
+              {aiStatus === "online"
+                ? "AI online"
+                : aiStatus === "offline"
+                  ? "AI offline (using fallback)"
+                  : "Checking AI…"}
             </p>
           </div>
           <button
@@ -811,7 +811,7 @@ function CreativeEntry({ onEntrySaved }: EntryFormProps) {
         <div className="rounded-lg border border-[--creative]/20 bg-[--surface] px-4 py-3 text-sm text-[--foreground]">
           <p className="whitespace-pre-line">
             {promptState?.text ??
-              "Tap “Generate prompt” to ask the internal Ollama instance for a tailored idea."}
+              "Tap “Generate prompt” to ask your AI provider for a tailored idea."}
           </p>
         </div>
         {promptNotice ? (

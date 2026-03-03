@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Simple Journal",
     short_name: "Journal",
-    description: "Tailnet-only anger, gratitude, and creative journaling.",
+    description: "Private anger, gratitude, and creative journaling.",
     start_url: "/",
     display: "standalone",
     background_color: "#f8f4ee",

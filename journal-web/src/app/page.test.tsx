@@ -148,9 +148,9 @@ describe("HistoryPreview", () => {
       "/api/entries?page=1&pageSize=10",
       expect.objectContaining({ method: "GET" }),
     );
-    expect(container.textContent).toContain("Your full archive");
+    expect(container.textContent).toContain("Recent Entries");
     expect(container.textContent).toContain("Showing 1");
-    expect(container.textContent).toContain("Full archive →");
+    expect(container.textContent).toContain("View All");
     cleanup();
   });
 
