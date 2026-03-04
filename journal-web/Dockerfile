@@ -15,8 +15,8 @@ RUN npm run build
 
 # Compile seed.ts → prisma/compiled/seed.js (no ts-node needed at runtime)
 RUN printf '{"compilerOptions":{"module":"commonjs","target":"ES2017","esModuleInterop":true,"skipLibCheck":true,"rootDir":"prisma","outDir":"prisma/compiled","moduleResolution":"node","strict":false},"files":["prisma/seed.ts"]}' \
-    > /tmp/seed.tsconfig.json \
-  && node_modules/.bin/tsc -p /tmp/seed.tsconfig.json
+    > ./seed.tsconfig.json \
+  && node_modules/.bin/tsc -p ./seed.tsconfig.json
 
 FROM node:22-alpine AS runner
 WORKDIR /app
