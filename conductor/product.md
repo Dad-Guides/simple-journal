@@ -19,7 +19,7 @@ There is exactly one user: the operator who deploys and runs the stack.
 |-----------|-------------|
 | Technical level | Comfortable with Docker and basic CLI usage |
 | Goal | A private, fast journaling habit without cloud dependencies |
-| Environment | Personal server, home lab, or desktop machine; accessible only on a local network or VPN/tailnet |
+| Environment | Personal server, home lab, or desktop machine; accessible only on a local network or VPN |
 | AI preference | Optionally uses a local LLM (Ollama) or any OpenAI-compatible provider; comfortable with AI being unavailable |
 
 ---

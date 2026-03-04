@@ -6,7 +6,7 @@
 
 ## Context
 
-The creative prompt generation feature calls Ollama's native API: `POST /api/generate` with a `{ model, prompt, stream: false }` body and parses `response.response`. This is Ollama-specific and couples the application to a single AI provider. When transitioning to a public GitHub repository, private infrastructure references (including `ollama.tailnet.local`) must be removed, and the app should support any AI provider a user might already have.
+The creative prompt generation feature originally called Ollama's native API: `POST /api/generate` with a `{ model, prompt, stream: false }` body. This was Ollama-specific and coupled the application to a single AI provider. The goal is for the app to support any AI provider a self-hoster might already have.
 
 ## Options Considered
 

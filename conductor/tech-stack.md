@@ -83,4 +83,3 @@
 | `NEXT_PUBLIC_APP_URL` | No | Public URL for PWA manifest |
 | `SESSION_COOKIE_SECURE` | No | Override cookie secure flag (`true`/`false`) |
 
-> **Note:** `.env.example` currently reflects old variable names (`OLLAMA_URL`, `OLLAMA_MODEL`, `REDIS_URL`). The rename is task P5 of the public release track.

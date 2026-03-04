@@ -3,33 +3,39 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-journal}
-      POSTGRES_USER: ${POSTGRES_USER:-journal}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: journal
+      POSTGRES_USER: journal
+      POSTGRES_PASSWORD: CHANGE_ME        # ← set a strong password
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-journal}"]
+      test: ["CMD-SHELL", "pg_isready -U journal"]
       interval: 5s
       timeout: 3s
       retries: 5
 
   journal-web:
-    container_name: journal-web
+    image: ghcr.io/dad-guides/simple-journal:latest
     build:
       context: ./journal-web
       target: runner
-    env_file:
-      - .env
+    restart: unless-stopped
     environment:
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL:-postgres://${POSTGRES_USER:-journal}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-journal}}
+      DATABASE_URL: postgres://journal:CHANGE_ME@db:5432/journal  # ← same password
+      SESSION_COOKIE_SECURE: "false"   # set to "true" if behind HTTPS
+      # AI provider — or configure via the Settings page in the app (no restart needed)
+      # AI_BASE_URL: http://your-ai-host:11434/v1
+      # AI_MODEL: mistral:latest
+      # AI_API_KEY: ""
     ports:
-      - "${PORT:-3003}:3003"
-    restart: unless-stopped
+      - "3003:3003"
+    volumes:
+      - journal-data:/data
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
   pgdata:
+  journal-data:

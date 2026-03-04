@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/auth";
 
-const AI_MODEL = process.env.AI_MODEL ?? "mistral:latest";
-
 type CreativePromptPayload = {
   personaIds?: string[];
   seedText?: string;
@@ -19,6 +17,11 @@ export async function POST(request: Request) {
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const user = await prisma.user.findFirst({ where: { id: userId } });
+  const aiBaseUrl = user?.aiBaseUrl ?? process.env.AI_BASE_URL ?? "";
+  const aiModel   = user?.aiModel   ?? process.env.AI_MODEL   ?? "mistral:latest";
+  const aiApiKey  = user?.aiApiKey  ?? process.env.AI_API_KEY ?? "";
 
   const payload = (await request.json().catch(() => ({}))) as CreativePromptPayload;
   const personaIds = Array.isArray(payload.personaIds)
@@ -49,7 +52,7 @@ export async function POST(request: Request) {
     .map((persona) => `${persona.name}: ${persona.description}`)
     .join("\n");
   const generatorPrompt = buildGeneratorPrompt(personasSummary, seedText);
-  const aiResult = await generateViaAI(generatorPrompt);
+  const aiResult = await generateViaAI(generatorPrompt, { aiBaseUrl, aiModel, aiApiKey });
 
   const finalText =
     aiResult.ok && aiResult.text.trim().length > 0
@@ -70,7 +73,7 @@ export async function POST(request: Request) {
       personas: personasUsed,
       seedText,
       prompt: generatorPrompt,
-      model: AI_MODEL,
+      model: aiModel,
     },
     response: (aiResult.raw ?? null) as Prisma.InputJsonValue,
     usedFallback: !aiResult.ok,
@@ -117,9 +120,11 @@ function buildGeneratorPrompt(personaSummary: string, seedText: string) {
   return `${base}${personaBlock}\n\n${seed}\n${instructions}\nReturn plain text without Markdown bullets or titles.`;
 }
 
-async function generateViaAI(prompt: string): Promise<AIResult> {
-  const aiBaseUrl = process.env.AI_BASE_URL ?? "";
-  const aiApiKey = process.env.AI_API_KEY ?? "";
+async function generateViaAI(
+  prompt: string,
+  config: { aiBaseUrl: string; aiModel: string; aiApiKey: string },
+): Promise<AIResult> {
+  const { aiBaseUrl, aiModel, aiApiKey } = config;
 
   if (!aiBaseUrl) {
     return {
@@ -130,7 +135,7 @@ async function generateViaAI(prompt: string): Promise<AIResult> {
     };
   }
 
-  const endpoint = new URL("/chat/completions", aiBaseUrl);
+  const endpoint = new URL(`${aiBaseUrl.replace(/\/+$/, "")}/chat/completions`);
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (aiApiKey) {
     headers["Authorization"] = `Bearer ${aiApiKey}`;
@@ -141,7 +146,7 @@ async function generateViaAI(prompt: string): Promise<AIResult> {
       method: "POST",
       headers,
       body: JSON.stringify({
-        model: AI_MODEL,
+        model: aiModel,
         messages: [{ role: "user", content: prompt }],
         stream: false,
       }),

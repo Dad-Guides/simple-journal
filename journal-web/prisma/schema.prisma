@@ -16,6 +16,9 @@ enum EntryType {
 model User {
   id           String         @id @default(uuid())
   passcodeHash String?
+  aiBaseUrl    String?
+  aiModel      String?
+  aiApiKey     String?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   entries      JournalEntry[]

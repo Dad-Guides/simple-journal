@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3003",
+    "dev": "dotenv -e ../.env -- next dev -p 3003",
     "build": "next build",
-    "start": "next start -p 3003",
+    "start": "dotenv -e ../.env -- next start -p 3003",
     "lint": "eslint",
     "test": "vitest run",
-    "prisma:generate": "dotenv --path ../.env -- prisma generate",
+    "prisma:generate": "dotenv -e ../.env -- prisma generate",
     "prisma:format": "prisma format",
-    "db:migrate": "dotenv --path ../.env -- prisma migrate deploy",
-    "db:seed": "dotenv --path ../.env -- prisma db seed"
+    "db:migrate": "dotenv -e ../.env -- prisma migrate deploy",
+    "db:seed": "dotenv -e ../.env -- prisma db seed"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",

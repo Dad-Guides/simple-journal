@@ -10,6 +10,7 @@ vi.mock("@/lib/auth", () => ({
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    user: { findFirst: vi.fn() },
     creativePersona: {
       findMany: vi.fn(),
     },
@@ -20,6 +21,7 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 const mockedSession = vi.mocked(getSessionUserId);
+const mockedUserFindFirst = vi.mocked(prisma.user.findFirst);
 const mockedPersonaFindMany = vi.mocked(prisma.creativePersona.findMany);
 const mockedPromptCreate = vi.mocked(prisma.creativePrompt.create);
 
@@ -29,6 +31,7 @@ describe("POST /api/prompts/creative", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedSession.mockResolvedValue("user-1");
+    mockedUserFindFirst.mockResolvedValue(null);
     vi.stubGlobal("fetch", fetchMock);
     vi.stubEnv("AI_BASE_URL", "http://test-ai-provider");
   });
@@ -121,6 +124,41 @@ describe("POST /api/prompts/creative", () => {
         },
       ],
     });
+  });
+
+  it("uses DB AI settings over env vars when user has them configured", async () => {
+    mockedUserFindFirst.mockResolvedValue({
+      id: "user-1",
+      aiBaseUrl: "http://db-ai-provider",
+      aiModel: "llama3:latest",
+      aiApiKey: "db-key",
+    } as never);
+    mockedPersonaFindMany.mockResolvedValue([
+      { id: "persona-1", name: "Muse", description: "dreamy voice" },
+    ] as never);
+    mockedPromptCreate.mockResolvedValue({
+      id: "prompt-1",
+      promptText: "Write about stardust.",
+    } as never);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ choices: [{ message: { content: "Write about stardust." } }] }),
+    });
+
+    await POST(
+      new NextRequest("http://localhost/api/prompts/creative", {
+        method: "POST",
+        body: JSON.stringify({ personaIds: ["persona-1"] }),
+      }),
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      new URL("/chat/completions", "http://db-ai-provider"),
+      expect.objectContaining({
+        body: expect.stringContaining('"model":"llama3:latest"'),
+      }),
+    );
   });
 
   it("falls back when AI provider is unreachable and still stores a prompt", async () => {

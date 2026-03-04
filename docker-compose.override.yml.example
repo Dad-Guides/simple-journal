@@ -1,5 +1,5 @@
 # Copy to docker-compose.override.yml to use an external Postgres.
-# Also set DATABASE_URL in .env to point at your external host.
+# Also update DATABASE_URL in docker-compose.yml to point at your external host.
 
 services:
   db:

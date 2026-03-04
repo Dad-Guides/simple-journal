@@ -10,6 +10,14 @@ This file is the index of all development tracks for simple-journal.
 
 ---
 
+## Backlog (not yet tracked)
+
+| Item | Notes |
+|------|-------|
+| App icon / favicon | Replace the default Next.js boilerplate favicon with a pencil/journal/writing SVG. `src/app/icon.svg` is auto-picked up by Next.js App Router. |
+
+---
+
 ## Completed Work (Pre-Track)
 
 The following phases were completed before the conductor infrastructure was set up. They are documented in [`AGENTS.md § Progress Snapshot (Apr 29, 2026)`](../AGENTS.md).

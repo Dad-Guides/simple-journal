@@ -1,22 +1,11 @@
 import Link from "next/link";
 import { AdminControls } from "./components/AdminControls";
+import { AISettings } from "./components/AISettings";
 
 const ENV_VARS = [
   {
     name: "DATABASE_URL",
     description: "PostgreSQL connection string used by Prisma.",
-  },
-  {
-    name: "AI_BASE_URL",
-    description: "Base URL for any OpenAI-compatible endpoint (e.g. http://localhost:11434/v1 for Ollama).",
-  },
-  {
-    name: "AI_MODEL",
-    description: "Model identifier passed to the AI provider (e.g. mistral:latest).",
-  },
-  {
-    name: "AI_API_KEY",
-    description: "Bearer token for cloud AI providers. Omit for local Ollama.",
   },
   {
     name: "JWT_SECRET",
@@ -56,6 +45,14 @@ export default function SettingsPage() {
         </section>
 
         <section className="space-y-4">
+          <h2 className="text-xl font-semibold text-[--foreground]">AI Provider</h2>
+          <p className="text-sm text-[--muted]">
+            Configure the AI provider used for creative prompt generation. These settings override the operator defaults set in <code className="font-semibold text-[--accent]">.env</code>.
+          </p>
+          <AISettings />
+        </section>
+
+        <section className="space-y-4">
           <h2 className="text-xl font-semibold text-[--foreground]">Seeding & Troubleshooting</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2 rounded-xl border border-[--border-soft] bg-[--surface] p-4">
@@ -75,7 +72,7 @@ export default function SettingsPage() {
              <div className="space-y-2 rounded-xl border border-[--border-soft] bg-[--surface] p-4 md:col-span-2">
               <h3 className="font-semibold text-[--foreground]">AI Provider Connection</h3>
               <p className="text-sm text-[--muted]">
-                Ensure <code className="font-semibold text-[--accent]">AI_BASE_URL</code> is reachable from the Docker network. Check with: <code className="font-semibold text-[--accent]">docker compose exec journal-web curl $AI_BASE_URL/models</code>
+                AI settings are configured above. If using a local Ollama instance, ensure the base URL is reachable from the Docker network: <code className="font-semibold text-[--accent]">docker compose exec journal-web curl {"<base-url>"}/models</code>
               </p>
             </div>
           </div>
