@@ -64,6 +64,13 @@ On first boot the container auto-generates a `JWT_SECRET` and persists it to the
 
 If you already run a Postgres instance and don't want the bundled `db` service:
 
+0. Set Up Postgres:
+   Before starting, create the database on your external Postgres host:
+   ```bash
+   psql -h your-postgres-host -U your-admin-user -c "CREATE USER journal WITH PASSWORD 'your-strong-password';"
+   
+   psql -h your-postgres-host -U your-admin-user -c "CREATE DATABASE journal OWNER journal;"
+   ```
 1. Copy the override example:
    ```bash
    cp docker-compose.override.yml.example docker-compose.override.yml

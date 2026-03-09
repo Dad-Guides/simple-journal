@@ -2,13 +2,8 @@
 # Also update DATABASE_URL in docker-compose.yml to point at your external host.
 
 services:
-  db:
-    profiles:
-      - disabled   # prevents db from starting; never matches a --profile flag
-
   journal-web:
-    depends_on: {}   # removes healthcheck dependency on bundled db
-    # Uncomment to join an external Docker network:
+    depends_on: !override {}   # Uncomment to join an external Docker network:
     # networks:
     #   - your-network-name
 
