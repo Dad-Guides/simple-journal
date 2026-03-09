@@ -27,15 +27,15 @@ RUN addgroup -g 1001 -S nodejs \
   && adduser -S nextjs -u 1001 \
   && mkdir -p /data && chown nextjs:nodejs /data
 
-# Next.js standalone output
+# Install production deps (includes prisma + transitive deps)
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
+RUN npm ci --omit=dev
+
+# Next.js standalone output (overlay on top)
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/package.json ./package.json
-
-# Prisma CLI (build/index.js) + engines
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # Prisma schema, migrations, pre-compiled seed
 COPY --from=builder /app/prisma/schema.prisma ./prisma/schema.prisma
